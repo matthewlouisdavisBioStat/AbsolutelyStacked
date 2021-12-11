@@ -48,8 +48,16 @@ MLModel_DataPrep <- function(fit,name = "Default",y){
       return(fit)
     },
     predict = function(object, newdata, ...) {
+      
       mod <- object$fit_mod
-      dat <- mod$mlmodel@x %>%
+      tr <- try(mod$mlmodel@x,silent = T)
+            if(class(tr) == 'try-error'){
+              tr <- try(mod$mlmodel@input,silent = T)
+            }
+            if(class(tr) == 'try-error'){
+              stop('Cannot find recipe from fit object: try updating MachineShop to latest version, or using a recipe object to fit instead of a raw data set and formula separately')
+            }
+      dat <- tr %>%
         prep %>%
         bake(new_data = newdata)
       if(nrow(dat) == 1){
