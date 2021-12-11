@@ -1,6 +1,6 @@
 #' Convert the log-likelkihood for common REF models into MLMetrics()
 #' @param link_function the link function corresponding to the log-likelihood desired.
-#' @param tau the fixed exponential dispersion parameter for computing the log-likelihood (i.e., this would be sigma squared for a normal distribution).
+#' @param tau the fixed exponential dispersion parameter for computing the log-likelihood (i.e., this would be sigma for a normal distribution).
 #' @param double whether to double the log-likelihood when computing the metric, which suggests a Wilks-like statistic.
 #'
 #' @details Make MachineShop-compatible MLMetrics reflecting certain log-likelihoods for predicted and observed responses.
@@ -44,10 +44,10 @@ make_loglikelihood_MLMetric <- function(link_function,tau,double){
       cumgenfunc <- function(eta)0.5*eta^2
 
       ## estimating tau is the same as the mse
-      tau <- ifelse(tau == 1,mse(observed,predicted),tau)
+      tau <- ifelse(tau == 1,MachineShop::rmse(observed,predicted),tau)
 
       # ## offset function
-      C <- function(observed, tau)sum(-0.5*log(2*pi) + -0.5*log(tau) + -0.5/tau * observed^2,
+      C <- function(observed, tau)sum(-0.5*log(2*pi) + -0.5*log(tau^2) + -0.5/(tau^2) * observed^2,
                                       na.rm = T)
 
     } else if (link_function == "logit") {
