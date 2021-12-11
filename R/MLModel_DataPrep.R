@@ -23,7 +23,14 @@ MLModel_DataPrep <- function(fit,name = "Default",y){
     response_types = c('BinomialVariate', 'factor', 'matrix', 'NegBinomialVariate', 'numeric', 'PoissonVariate','Surv'),
     weights = F,
     fit = function(formula, data, weights, ...) {
-      dat <- fit$mlmodel@x %>%
+       tr <- try(fit$mlmodel@x,silent = T)
+            if(class(tr) == 'try-error'){
+              tr <- try(fit$mlmodel@input,silent = T)
+            }
+            if(class(tr) == 'try-error'){
+              stop('Cannot find recipe from fit object: try updating MachineShop to latest version, or using a recipe object to fit instead of a raw data set and formula separately')
+            }
+       dat <- tr %>% 
         prep(training = data) %>%
         bake(new_data = data)
       mod <- fit
