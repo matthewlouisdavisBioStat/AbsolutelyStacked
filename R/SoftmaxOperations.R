@@ -27,7 +27,7 @@
 }
 
 
-# generalizes t(A) %*% B %*% C second step ( t(A) %*% B^1/2 ) when the elements of matrix A, B, C are comformable matrices. For use in the glmer_constrained() function.
+# generalizes t(A) %*% B %*% C second step ( (t(A) %*% B^1/2) %*% (B^1/2 %*% C) ) when the elements of matrix A, B, C are comformable matrices. For use in the glmer_constrained() function.
 `%*t3*%` <- function(A,C){
   dummy <- matrix(0,nrow = ncol(A[[1]]),
                   ncol = ncol(C[[1]]))
