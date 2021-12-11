@@ -14,8 +14,8 @@
 #' }
 #' @export
 predict_glmerStacked <- function(fit,newdata,newZ = NULL, use_randint = F,type = 'prob'){
-  if(!use_randint){
-    fit$super_fit$data$Zmat <- fit$super_fit$data$Zmat * 0
+  if(!use_randint | is.null(newZ)){
+    fit$super_fit$data$Zmat <- (fit$super_fit$data$Zmat * 0)[1:nrow(newdata),]
     predict(fit,newdata = newdata,type = type)
   } else{
     if(!is.null(newZ)){
