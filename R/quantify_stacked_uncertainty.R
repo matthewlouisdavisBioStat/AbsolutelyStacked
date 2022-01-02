@@ -116,6 +116,7 @@ quantify_stacked_uncertainty <- function(fit,
         x
       )))))
   }
+  ## linear has special case for which explicit integration-out of eta is possible
   if (l == 'linear') {
     stan.model <- paste0(
       "
@@ -123,29 +124,44 @@ data{
   int N;     // Total number of observations
   real Y[N]; // Numeric Outcome
   real etahat[N]; // Predicted etahat
-  real sigma_eta; // SD of eta
+  real<lower=0> sigmaSq_eta; // hyperparameter of prior normal variance on eta
+  real<lower=0> mu_eta; // hyperparameter of prior normal expectation on eta
 }
 parameters{
-  vector[N] eta;
-  real<lower=0> dispersion;
+  ",paste0(ifelse2(is.null(prior_dispersion),
+  "real<lower=0> tau",
+  "real<lower=0> dispersion")),";
   real<lower=0> sigmaSq_etahat;
 }
+transformed parameters{
+  ",paste0(ifelse2(is.null(prior_dispersion),
+                   "real<lower=0> dispersion;",
+                   "")),"
+  real<lower=0> sigmaSq_1;
+  real mu_1[N];
+  ",paste0(ifelse2(is.null(prior_dispersion),
+                   "dispersion = 1/tau;",
+                   "")),"
+  sigmaSq_1 = 1/(1/dispersion + 1/sigmaSq_eta);
+  for(nn in 1:N){
+    mu_1[nn] = (mu_eta/sigmaSq_eta + Y[nn]/dispersion)*sigmaSq_1;
+  }
+}
 model {
-  eta ~ normal(etahat,sigma_eta);
   sigmaSq_etahat ~ ", prior_sigmaSq_etahat, ";
-  dispersion ~ ",
+  ",
         paste0(ifelse2(is.null(prior_dispersion),
-        paste0('gamma(',fit$super_fit$data$final_fit$tau ^ 2,',1)'),
-        prior_dispersion)),";
-  ", link_likelihood, ";
-  etahat ~ normal(eta,sqrt(sigmaSq_etahat));
+           paste0('tau ~ gamma(',1.5,',',(fit$super_fit$data$final_fit$tau ^ 2),')'),
+           paste0('dispersion ~ ',prior_dispersion))),";
+  etahat ~ normal(mu_1,sqrt(sigmaSq_etahat+sigmaSq_1));
 }
 ")
     stan.data <- list(
       N = length(Y),
       Y = Y,
       etahat = etahat,
-      sigma_eta = sd(Y)  *  2
+      mu_eta = mean(Y),
+      sigmaSq_eta = var(Y)
     )
     system.time({
       stan.result <- try({stan(
