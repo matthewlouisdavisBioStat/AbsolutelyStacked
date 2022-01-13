@@ -77,7 +77,7 @@ make_glmerStackedModel <- function(
     name = "glmerEnsemble",
     label = paste0("Fits generalized linear mixed effecs models for stacking, with coefficients constrained to be positive and sum to 1 and backwards variable selection via AIC for choosing base learners"),
     response_types = c("numeric","factor","Surv","PoissonVariate"),
-    fit = function(formula = as.formula(y ~ 1),
+    fit = function(formula = as.formula("y ~ 1"),
                    data,
                    ...) {
 
