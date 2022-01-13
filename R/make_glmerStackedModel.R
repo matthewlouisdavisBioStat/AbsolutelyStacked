@@ -77,7 +77,7 @@ make_glmerStackedModel <- function(
     name = "glmerEnsemble",
     label = paste0("Fits generalized linear mixed effecs models for stacking, with coefficients constrained to be positive and sum to 1 and backwards variable selection via AIC for choosing base learners"),
     response_types = c("numeric","factor","Surv","PoissonVariate"),
-    fit = function(formula = as.formula("y ~ 1"),
+    fit = function(formula = as.formula(y ~ 1),
                    data,
                    ...) {
 
@@ -352,18 +352,27 @@ make_glmerStackedModel <- function(
         link_func <- function(K) log(K)
         inv_link_func <- function(K) exp(K)
       }
-      if (link_function  == "logit") {
-        link_func <- function(K) log(min(max(K,0.0025),0.9975)/(1-min(max(K,0.0025),0.9975)))
-        inv_link_func <- function(K)1 / (1 + exp(-K))
-      }
-      if (link_function  == "inverse") {
-        link_func <- function(K)1 / max(K,0.00001)
-        inv_link_func <- function(K)1 / K
-      }
-      if (link_function  == "probit") {
-        link_func <- function(K)qnorm(min(max(K,0.00001),0.9999))
-        inv_link_func <- function(K)pnorm(K)
-      }
+      if (link == "logit") {
+                                   link_func <- function(K){
+                                     x <- log(K/(1 - K))
+                                     x <- ifelse(is.na(x), 0, x)
+                                     x <- ifelse(x == -Inf, -2.5, x)
+                                     x <- ifelse(x == Inf, 2.5, x)
+                                     x
+                                   } 
+                                 }
+                                 if (link == "inverse") {
+                                   link_func <- function(K) 1/K
+                                 }
+                                 if (link == "probit") {
+                                   link_func <- function(K){
+                                     x <- qnorm(K)
+                                     x <- ifelse(is.na(x), 0, x)
+                                     x <- ifelse(x == -Inf, -2.5, x)
+                                     x <- ifelse(x == Inf, 2.5, x)
+                                     x
+                                   } 
+                                 }
       if (link_function  == "weibull") {
         link_func <- function(K)log(max(ifelse(is.nan(K) | is.na(K),
                                                mean(K,na.rm = T),
