@@ -34,8 +34,6 @@ stepAIC_stacked <- function(vars,cv_data, Zmodel,link_func,est_tau_model = F,t_i
   surv <- link_func == 'weibull'
   keep_going <- TRUE
   Ymodel <- cv_data$y
-  print(head(cv_data))
-  print(head(Ymodel))
 
   iter <- 0
   b_init_post <- b_init
