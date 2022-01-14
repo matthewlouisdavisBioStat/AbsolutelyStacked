@@ -330,7 +330,10 @@ glmer_constrained <- function(link_function,
     if(!probit_function & !softmax_function & !surv){
 
       ## canonical REF form
+      print(c("Z_function %*% U",Z_function %*% U))
       Eta <- X_function %*% B + Z_function %*% U
+      print(c("loglik Eta",Eta))
+      print(c("sum(Y_function*Eta)",sum(Y_function*Eta)))
       as.numeric( (sum(Y_function*Eta) - sum(sapply(Eta,cumgenfunc)))/tau_function^2 + C(Y_function,tau_function)) +
         sum((sapply(sigma_list_function,function(inds){
           Z_function_u <- Z_function[,inds]
