@@ -334,9 +334,7 @@ glmer_constrained <- function(link_function,
     if(!probit_function & !softmax_function & !surv){
 
       ## canonical REF form
-      print(c("Z_function %*% U",Z_function %*% U))
       Eta <- X_function %*% B + Z_function %*% U
-      print(c("loglik Eta",Eta))
       print(c("sum(Y_function*Eta)",sum(Y_function*Eta)))
       as.numeric( (sum(Y_function*Eta) - sum(sapply(Eta,cumgenfunc)))/tau_function^2 + C(Y_function,tau_function)) +
         sum((sapply(sigma_list_function,function(inds){
@@ -805,8 +803,7 @@ glmer_constrained <- function(link_function,
     ## start damp stepping
     damp_step_attempts <- 0
     print(c("current likelihood: ",curr_lik))                                            
-    while((curr_lik > upd_lik + 0.00001) & damp_step_attempts < 15){
-       print(c("updated likelihood: ",upd_lik))    
+    while((curr_lik > upd_lik + 0.00001) & damp_step_attempts < 15){   
       ## damp the newton step
       damp <- 1/(2^damp_step_attempts) # 1/2, 1/8, etc.
       damp_step_attempts <- damp_step_attempts + 1
