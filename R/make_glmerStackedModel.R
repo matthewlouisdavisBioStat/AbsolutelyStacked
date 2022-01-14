@@ -169,9 +169,33 @@ make_glmerStackedModel <- function(
         ## link functions
         if (link == "linear"){link_func <- function(K)K}
         if (link == "log"){link_func <- function(K)log(K)}
-        if (link == "logit"){link_func <- function(K)log(K/(1-K))}
-        if (link == "inverse"){link_func <- function(K)1/K}
-        if (link == "probit"){link_func <- function(K)qnorm(K)}
+        if (link == "logit") {
+                                   link_func <- function(K){
+                                     x <- log(K/(1 - K))
+                                     x <- ifelse(is.na(x), 0, x)
+                                     x <- ifelse(x == -Inf, -2.5, x)
+                                     x <- ifelse(x == Inf, 2.5, x)
+                                     x
+                                   } 
+                                   inv_link_func <- function(K)1/(1+exp(-K))
+                                 }
+                                 if (link == "inverse") {
+                                   link_func <- function(K) 1/K
+                                   inv_link_func <- function(K)1/K
+                                 }
+                                 if (link == "probit") {
+                                   link_func <- function(K){
+                                     x <- qnorm(K)
+                                     x <- ifelse(is.na(x), 0, x)
+                                     x <- ifelse(x == -Inf, -2.5, x)
+                                     x <- ifelse(x == Inf, 2.5, x)
+                                     x
+                                   } 
+                                   inv_link_func <- function(K)pnorm(K)
+                                 }
+        #if (link == "logit"){link_func <- function(K)log(K/(1-K))}
+        #if (link == "inverse"){link_func <- function(K)1/K}
+        #if (link == "probit"){link_func <- function(K)qnorm(K)}
         if(link == "softmax"){link_func <- function(K)rbind(log(K/(1-sum(K))))}
         if (link  == "weibull") link_func <- function(K)log(max(K,0.01))
 
@@ -360,9 +384,11 @@ make_glmerStackedModel <- function(
                                      x <- ifelse(x == Inf, 2.5, x)
                                      x
                                    } 
+                                   inv_link_func <- function(K)1/(1+exp(-K))
                                  }
                                  if (link == "inverse") {
                                    link_func <- function(K) 1/K
+                                   inv_link_func <- function(K)1/K
                                  }
                                  if (link == "probit") {
                                    link_func <- function(K){
@@ -372,6 +398,7 @@ make_glmerStackedModel <- function(
                                      x <- ifelse(x == Inf, 2.5, x)
                                      x
                                    } 
+                                   inv_link_func <- function(K)pnorm(K)
                                  }
       if (link_function  == "weibull") {
         link_func <- function(K)log(max(ifelse(is.nan(K) | is.na(K),
