@@ -797,8 +797,9 @@ glmer_constrained <- function(link_function,
 
     ## start damp stepping
     damp_step_attempts <- 0
+    print(c("current likelihood: ",curr_lik))                                            
     while((curr_lik > upd_lik + 0.00001) & damp_step_attempts < 15){
-
+       print(c("updated likelihood: ",upd_lik))    
       ## damp the newton step
       damp <- 1/(2^damp_step_attempts) # 1/2, 1/8, etc.
       damp_step_attempts <- damp_step_attempts + 1
