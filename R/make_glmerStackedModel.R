@@ -124,8 +124,8 @@ make_glmerStackedModel <- function(
         link_func <- function(K){
           x <- log(K/(1-sum(K,na.rm = T)))
           x <- ifelse(is.na(x),0,x)
-          x <- ifelse(x == -Inf,-10,x)
-          x <- ifelse(x == Inf,10,x)
+          x <- ifelse(x == -Inf,-2.5,x)
+          x <- ifelse(x == Inf,2.5,x)
           x
         }
 
