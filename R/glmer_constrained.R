@@ -166,8 +166,6 @@ glmer_constrained <- function(link_function,
     v_of_mu <- function(mu)1
 
   } else if (link_function == "logit") {
-    Y <- as.numeric(Y)
-    Y <- Y-min(Y)
 
     ## link function
     link <- function(mu)log(mu / (1 - mu))
@@ -228,8 +226,6 @@ glmer_constrained <- function(link_function,
     v_of_mu <- function(mu)mu
 
   } else if (link_function == "probit") {
-    Y <- as.numeric(Y)
-    Y <- Y-min(Y)
     probit <- T
 
     ## link function
@@ -335,8 +331,6 @@ glmer_constrained <- function(link_function,
 
       ## canonical REF form
       Eta <- X_function %*% B + Z_function %*% U
-      print(head(Y_function))
-      print(c("sum(Y_function*Eta)",sum(Y_function*Eta)))
       as.numeric( (sum(Y_function*Eta) - sum(sapply(Eta,cumgenfunc)))/tau_function^2 + C(Y_function,tau_function)) +
         sum((sapply(sigma_list_function,function(inds){
           Z_function_u <- Z_function[,inds]
@@ -803,7 +797,7 @@ glmer_constrained <- function(link_function,
 
     ## start damp stepping
     damp_step_attempts <- 0
-    print(c("current likelihood: ",curr_lik))                                            
+    #print(c("current likelihood: ",curr_lik))                                            
     while((curr_lik > upd_lik + 0.00001) & damp_step_attempts < 15){   
       ## damp the newton step
       damp <- 1/(2^damp_step_attempts) # 1/2, 1/8, etc.
