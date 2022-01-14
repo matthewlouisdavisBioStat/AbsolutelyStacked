@@ -166,6 +166,8 @@ glmer_constrained <- function(link_function,
     v_of_mu <- function(mu)1
 
   } else if (link_function == "logit") {
+    Y <- as.numeric(Y)
+    Y <- Y-min(Y)
 
     ## link function
     link <- function(mu)log(mu / (1 - mu))
@@ -226,6 +228,8 @@ glmer_constrained <- function(link_function,
     v_of_mu <- function(mu)mu
 
   } else if (link_function == "probit") {
+    Y <- as.numeric(Y)
+    Y <- Y-min(Y)
     probit <- T
 
     ## link function
