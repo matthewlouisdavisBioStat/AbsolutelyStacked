@@ -335,6 +335,7 @@ glmer_constrained <- function(link_function,
 
       ## canonical REF form
       Eta <- X_function %*% B + Z_function %*% U
+      print(head(Y_function))
       print(c("sum(Y_function*Eta)",sum(Y_function*Eta)))
       as.numeric( (sum(Y_function*Eta) - sum(sapply(Eta,cumgenfunc)))/tau_function^2 + C(Y_function,tau_function)) +
         sum((sapply(sigma_list_function,function(inds){
