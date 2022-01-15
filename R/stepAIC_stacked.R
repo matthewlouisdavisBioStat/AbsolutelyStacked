@@ -14,6 +14,7 @@
 #' @param use_fixed_weights T or F, whether stacked model should be fit or fixed weights assigned.
 #' @param preset_weights If use_fixed_weights == T,then this must be a vector of weights with length exactly equal to the number of base learners considered.
 #' @param tr T or F, should the program print out stepwise base-learner selection output?
+#' @param spf  function with consecutive arguments for number of base learners and number of observations, for computing the stepwise base learner selection penalty. function(k,n){2*k} yields traditional AIC. Defaults to 0.
 #' @details Make an MLModel to be inserted into the SuperModel function as the meta (aka super) learner. This allows one to stack ML models for a variety of different outcomes based on the GLM framework, and allows the user to perform backwards variable selection via AIC to choose an optimal combination of base learners.
 #'
 #' @return A MachineShop custom MLModel that can be passed into the SuperModel function as the meta (aka super) learner.
@@ -29,7 +30,7 @@
 #' }
 #' @export
 stepAIC_stacked <- function(vars,cv_data, Zmodel,link_func,est_tau_model = F,t_init,s_init,b_init,u_init,list_of_sigmas,qp = F,
-                            min_num_learners,use_fixed_weights = F,preset_weights = NULL,tr = T){
+                            min_num_learners,use_fixed_weights = F,preset_weights = NULL,tr = T,spf = function(k,n){0*k+0*n}){
   softmax <- link_func == 'softmax'
   surv <- link_func == 'weibull'
   keep_going <- TRUE
@@ -71,7 +72,8 @@ stepAIC_stacked <- function(vars,cv_data, Zmodel,link_func,est_tau_model = F,t_i
                                 u_update = u_init,
                                 sigma_list = list_of_sigmas,
                                 use_quadprog = qp,
-                                lambda = 0.000001))
+                                lambda = 0.000001,
+                                 step_penalty_function = spf))
       #print("Finished the outer-round of selection")
     b_init_post <- full_fit$beta_update
     names(b_init_post) <- vars
@@ -154,7 +156,8 @@ stepAIC_stacked <- function(vars,cv_data, Zmodel,link_func,est_tau_model = F,t_i
                                       u_update = u_init,
                                       sigma_list  = list_of_sigmas,
                                       use_quadprog = qp,
-                                      lambda = 0.000001))[['AIC']]
+                                      lambda = 0.000001,
+                                          step_penalty_function = spf))[['AIC']]
       }
     #}
     full_AIC <- full_fit[['AIC']]
