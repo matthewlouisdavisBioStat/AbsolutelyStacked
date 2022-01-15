@@ -10,7 +10,7 @@
 #' @param fixed_weights T or F, rather than fit the stacked model, should the weights be custom and fixed? If true, weights must be provided.
 #' @param weights A vector of weights with length EXACTLY equal to the number of base learners being stacked, required if fixed_weights is T.
 #' @param trace T or F, should the program print out stepwise base-learner selection output?
-#'
+#' @param AIC_penalty function with consecutive arguments for number of base learners and number of observations, for computing the stepwise base learner selection penalty. function(k,n){2*k} yields traditional AIC. Defaults to 0.
 #' @details Make an MLModel to be inserted into the SuperModel function as the meta (aka super) learner. This allows one to stack ML models for a variety of different outcomes based on the GLM framework, and allows the user to perform backwards variable selection via AIC to choose an optimal combination of base learners.
 #'
 #' @return A MachineShop custom MLModel that can be passed into the SuperModel function as the meta (aka super) learner.
@@ -36,7 +36,8 @@ make_glmerStackedModel <- function(
                                use_qp = F,
                                fixed_weights = F,
                                weights = NULL,
-                               trace = T){
+                               trace = T,
+                               AIC_penalty = function(k,n){0*k+0*n}){
   ## min learners stop
   if(min_learners < 2){
     stop("Minimum number of base learners is 2: choosing only one base learner will break things!")
@@ -284,7 +285,8 @@ make_glmerStackedModel <- function(
                            min_num_learners = min_learners,
                            use_fixed_weights = fixed_weights,
                            preset_weights = weights,
-                           tr = trace)
+                           tr = trace,
+                                  spf = AIC_penalty)
       end_time <- Sys.time()
       if(trace){
         print(paste0("Finished Selecting Base Learners, Time Elapsed: ",end_time - start_time))
