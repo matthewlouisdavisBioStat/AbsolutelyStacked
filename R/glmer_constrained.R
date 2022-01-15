@@ -13,7 +13,7 @@
 #' @param use_quadprog T or F, should sequential quadratic programming using the quadprog package (T) or a general non-linear programmming algorithm using the Rsolnp package (F) be used to find MLEs under constraint. Defaults to F.
 #' @param sum_constraint real number referring to the sum-constraint on fixed effect coefficients.
 #' @param lower_bound_constraint real number (or vector with length equal to the length beta_update AND the number of columns of X) defining the lower bound constraint on fixed effect coefficients.
-#' @param step_penalty_function  function with consecutive arguments "k" and "n", k being the number of base learners, n the number of observations, for computing the stepwise base learner selection penalty. function(k,n){2*k} yields traditional AIC. Defaults to 0.
+#' @param step_penalty_function  function with consecutive arguments for number of base learners and number of observations, for computing the stepwise base learner selection penalty. function(k,n){2*k} yields traditional AIC. Defaults to 0.
 #'
 #' @details First, generalized linear mixed effects models are fit using unconstrained maximum likelihood estimation via a damped Newton-Raphson algorithm. Coefficients are then updated to reflect the desired constraints, with initial values supplied to the functions based off of the unconstrained MLEs.
 #'
@@ -1064,9 +1064,8 @@ glmer_constrained <- function(link_function,
     }
     #print("Finished Fitting Under Constraint")
   loglik <- compute_loglik(Y,X,Z,beta_update,u_update,tau,cumgenfunc,C,sigmas,sigma_list,probit,softmax_function = softmax)
-  n <- length(Y)
-  k <- length(weights[round(weights,4) > 0.0001])
-  AIC <- -2*loglik + 2*step_penalty_function(k,n)
+  AIC <- -2*loglik + step_penalty_function(length(weights[round(weights,4) > 0.0001]),
+                                             length(Y))
   # AIC <- ifelse2(link_function != 'linear',
   #               as.numeric(-2*loglik + 2*k),
   #               as.numeric(-2*loglik + 2*k*n/(n-k-1))) ## use corrected AICc when possible
