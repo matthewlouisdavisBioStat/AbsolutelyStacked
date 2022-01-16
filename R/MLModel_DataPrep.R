@@ -1,5 +1,5 @@
 #' Pair a data pre-processing step and MLModel for insertion into a stacked model
-#' @param fit a previously fit MachineShop MLModel fit
+#' @param fit hardcode the data preparation steps associated with this MLModelFit into a new MLModel object. Only works if all predictors are numeric.
 #' @param name an optional, new custom name for the new MLModel returned
 #' @param y the name of the outcome of interest modelled by the fit object.
 #'
@@ -42,7 +42,6 @@ MLModel_DataPrep <- function (fit, name = "Default", y) {
             fo <- as.formula(paste0(y,"~ .",collapse = ""))
             mlmodel <- as.MLModel(mod)
             fitNew <- fit(fo, data = temp_dat, model = mlmodel)
-            print("Finished Fitting")
             fit <- lm(as.numeric(dat[[y]])[1:nrow(dat)] ~ 0 + 
                         predict(fitNew, newdata = dat, type = "prob"))
             fit$coefficients <- 1
