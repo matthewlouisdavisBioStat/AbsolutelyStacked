@@ -17,8 +17,7 @@
 #'  MLModel_DataPrep(fit,name = "new_fit",y = "outcome")
 #' }
 #' @export
-MLModel_DataPrep <- function (fit, name = "Default", y) 
-{
+MLModel_DataPrep <- function (fit, name = "Default", y) {
   MLModel(name = name, response_types = c("BinomialVariate", 
                                           "factor", "matrix", "NegBinomialVariate", 
                                           "numeric", "PoissonVariate", "Surv"), 
