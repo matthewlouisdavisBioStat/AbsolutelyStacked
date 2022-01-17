@@ -383,7 +383,15 @@ make_glmerStackedModel <- function(
         inv_link_func <- function(K) K
       }
       if (link_function  == "log") {
-        link_func <- function(K) log(K)
+        link_func <- function(K){
+          K[is.na(K) | !is.finite(K)] <- mean(K,na.rm = T)
+          K[K <= 0] <- min(
+              min(K[K > 0],na.rm=T),
+              1,
+              na.rm = T
+            )
+          log(K)
+        }
         inv_link_func <- function(K) exp(K)
       }
       if (link == "logit") {
