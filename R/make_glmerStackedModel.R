@@ -123,6 +123,10 @@ make_glmerStackedModel <- function(
         ## predicted probabilities of 0 become -10 on log-odds scale,
         ## predicted probabilities of 1s become 10s on the log-odds scale
         link_func <- function(K){
+          K[K<=0] <- 0.00001
+          K[K>=1] <- 0.99999
+          K[is.na(K)] <- 1/num_cats
+          K[is.nan(K)] <- 1/num_cats
           x <- log(K/(1-sum(K,na.rm = T)))
           x <- ifelse(is.na(x),0,x)
           x <- ifelse(is.nan(x),0,x)
@@ -477,6 +481,10 @@ make_glmerStackedModel <- function(
                       "[.]") %>% unlist)[[1]]
           }) %>% unique
         link_func <- function(K){
+          K[K<=0] <- 0.00001
+          K[K>=1] <- 0.99999
+          K[is.na(K)] <- 1/num_cats
+          K[is.nan(K)] <- 1/num_cats
           x <- log(K/(1-sum(K,na.rm = T)))
           x <- ifelse(is.na(x),0,x)
           x <- ifelse(is.nan(x),0,x)
