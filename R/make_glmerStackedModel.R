@@ -125,9 +125,9 @@ make_glmerStackedModel <- function(
         link_func <- function(K){
           x <- log(K/(1-sum(K,na.rm = T)))
           x <- ifelse(is.na(x),0,x)
+          x <- ifelse(is.nan(x),0,x)
           x <- ifelse(x == -Inf,-2.5,x)
           x <- ifelse(x == Inf,2.5,x)
-          x
         }
 
         ## apply inverse-softmax link function to the predictions of base learners
@@ -217,13 +217,13 @@ make_glmerStackedModel <- function(
           ## ie for svms that only take on binary outcome values
           if(link == "logit"){
             if(!(any(x != 0) | any(x != 1))){
-              x <- x*10 + (1-x)*(-10)
+              x <- x*2.5 + (1-x)*(-2.5)
             }
           }
 
           if(link == "probit"){
             if(!(any(x != 0) | any(x != 1))){
-              x <- x*3.5 + (1-x)*(-3.5)
+              x <- x*2.5 + (1-x)*(-2.5)
             }
           }
           sapply(x,link_func)
@@ -477,10 +477,11 @@ make_glmerStackedModel <- function(
                       "[.]") %>% unlist)[[1]]
           }) %>% unique
         link_func <- function(K){
-          x <- log(K/(1-sum(K)))
+          x <- log(K/(1-sum(K,na.rm = T)))
           x <- ifelse(is.na(x),0,x)
-          x <- ifelse(x == -Inf,-10,x)
-          x <- ifelse(x == Inf,10,x)
+          x <- ifelse(is.nan(x),0,x)
+          x <- ifelse(x == -Inf,-2.5,x)
+          x <- ifelse(x == Inf,2.5,x)
           x
         }
         X <- lapply(paste0(bs_lrnrs,"."),function(x){
