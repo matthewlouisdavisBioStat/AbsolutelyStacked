@@ -122,27 +122,23 @@ make_glmerStackedModel <- function(
         ## note, this is fixed so only binary-response base learners can be link-transformed
         ## predicted probabilities of 0 become -10 on log-odds scale,
         ## predicted probabilities of 1s become 10s on the log-odds scale
-        link_func <- function(K){
-          K[K<=0] <- 0.00001
-          K[K>=1] <- 0.99999
-          K[is.na(K)] <- 1/num_cats
-          K[is.nan(K)] <- 1/num_cats
-          x <- log(K/(1-sum(K,na.rm = T)))
-          x <- ifelse(is.na(x),0,x)
-          x <- ifelse(is.nan(x),0,x)
-          x <- ifelse(x == -Inf,-2.5,x)
-          x <- ifelse(x == Inf,2.5,x)
-        }
-
-        ## apply inverse-softmax link function to the predictions of base learners
-        X <- lapply(paste0("X",1:nlearners,"."),function(x){
-          d <- data[,grepl(x,colnames(data))]
-          d <- t(apply(
-            as(d[,paste0(x,unique_outcomes)],'matrix'),
-            1,
-            link_func))
-          d
-        })
+        link_func <- function(K) {
+                                   K[K < 0.00001] <- 0.00001/(num_cats)
+                                   K[K > 0.99999] <- 0.99999/(num_cats)
+                                   K[is.na(K)] <- 1/num_cats
+                                   x <- c(log(K/(1 - sum(K, na.rm = T))))
+                                   x <- ifelse(is.na(x), 0, x)
+                                   x <- ifelse(x <= -10, -10, x)
+                                   x <- ifelse(x >= 10, 10, x)
+                                   unlist(x)
+                                 }
+                                 X <- lapply(paste0("X", 1:nlearners, "."), 
+                                             function(xx) {
+                                               d <- data[, paste0(xx, as.character(unique_outcomes))]
+                                               d <- t(apply(as(d[, paste0(xx, unique_outcomes)], 
+                                                               "matrix"), 1, link_func))
+                                               d
+                                             })
         names(X) <- paste0("X",1:nlearners)
         bs_lrnrs <- names(X)
         Y <- sapply(unique_outcomes,function(x){
@@ -186,8 +182,8 @@ make_glmerStackedModel <- function(
                                    link_func <- function(K){
                                      x <- log(K/(1 - K))
                                      x <- ifelse(is.na(x), 0, x)
-                                     x <- ifelse(x == -Inf, -2.5, x)
-                                     x <- ifelse(x == Inf, 2.5, x)
+                                     x <- ifelse(x < -10, -10, x)
+                                     x <- ifelse(x > 10, 10, x)
                                      x
                                    } 
                                    inv_link_func <- function(K)1/(1+exp(-K))
@@ -200,8 +196,8 @@ make_glmerStackedModel <- function(
                                    link_func <- function(K){
                                      x <- qnorm(K)
                                      x <- ifelse(is.na(x), 0, x)
-                                     x <- ifelse(x == -Inf, -2.5, x)
-                                     x <- ifelse(x == Inf, 2.5, x)
+                                     x <- ifelse(x < -5, -5, x)
+                                     x <- ifelse(x > 5, 5, x)
                                      x
                                    } 
                                    inv_link_func <- function(K)pnorm(K)
@@ -221,7 +217,7 @@ make_glmerStackedModel <- function(
           ## ie for svms that only take on binary outcome values
           if(link == "logit"){
             if(!(any(x != 0) | any(x != 1))){
-              x <- x*2.5 + (1-x)*(-2.5)
+              x <- x*10 + (1-x)*(-10)
             }
           }
 
@@ -402,8 +398,8 @@ make_glmerStackedModel <- function(
                                    link_func <- function(K){
                                      x <- log(K/(1 - K))
                                      x <- ifelse(is.na(x), 0, x)
-                                     x <- ifelse(x == -Inf, -2.5, x)
-                                     x <- ifelse(x == Inf, 2.5, x)
+                                     x <- ifelse(x < -10, -10, x)
+                                     x <- ifelse(x > 10, 10, x)
                                      x
                                    } 
                                    inv_link_func <- function(K)1/(1+exp(-K))
@@ -416,8 +412,8 @@ make_glmerStackedModel <- function(
                                    link_func <- function(K){
                                      x <- qnorm(K)
                                      x <- ifelse(is.na(x), 0, x)
-                                     x <- ifelse(x == -Inf, -2.5, x)
-                                     x <- ifelse(x == Inf, 2.5, x)
+                                     x <- ifelse(x < -5, -5, x)
+                                     x <- ifelse(x > 5, 5, x)
                                      x
                                    } 
                                    inv_link_func <- function(K)pnorm(K)
@@ -480,26 +476,23 @@ make_glmerStackedModel <- function(
             (strsplit(n,
                       "[.]") %>% unlist)[[1]]
           }) %>% unique
-        link_func <- function(K){
-          K[K<=0] <- 0.00001
-          K[K>=1] <- 0.99999
-          K[is.na(K)] <- 1/num_cats
-          K[is.nan(K)] <- 1/num_cats
-          x <- log(K/(1-sum(K,na.rm = T)))
-          x <- ifelse(is.na(x),0,x)
-          x <- ifelse(is.nan(x),0,x)
-          x <- ifelse(x == -Inf,-2.5,x)
-          x <- ifelse(x == Inf,2.5,x)
-          x
-        }
-        X <- lapply(paste0(bs_lrnrs,"."),function(x){
-          d <- data[,grepl(x,colnames(data))]
-          d <- t(apply(
-            as(d[,paste0(x,unique_outcomes)],'matrix'),
-            1,
-            link_func))
-          d
-        })
+        link_func <- function(K) {
+                                   K[K < 0.00001] <- 0.00001/(num_cats)
+                                   K[K > 0.99999] <- 0.99999/(num_cats)
+                                   K[is.na(K)] <- 1/num_cats
+                                   x <- c(log(K/(1 - sum(K, na.rm = T))))
+                                   x <- ifelse(is.na(x), 0, x)
+                                   x <- ifelse(x <= -10, -10, x)
+                                   x <- ifelse(x >= 10, 10, x)
+                                   unlist(x)
+                                 }
+                                 X <- lapply(paste0(bs_lrnrs, "."), 
+                                             function(xx) {
+                                               d <- data[, paste0(xx, as.character(unique_outcomes))]
+                                               d <- t(apply(as(d[, paste0(xx, unique_outcomes)], 
+                                                               "matrix"), 1, link_func))
+                                               d
+                                             })
         names(X) <- bs_lrnrs
         B <- super_fit$coefficients[bs_lrnrs_selected]
         X <- X[bs_lrnrs_selected]
