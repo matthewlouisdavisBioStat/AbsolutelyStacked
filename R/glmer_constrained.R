@@ -585,7 +585,7 @@ glmer_constrained <- function(link_function,
       W <- lapply(1:nrow(Mu),function(i){
         Mu_i <- Mu[i,]
           ## fisher score with equiv probs if nas 
-        if(any(is.na(Mu_i) | is.nan(Mu_i) | !is.finite(Mu_i)){
+        if(any(is.na(Mu_i) | is.nan(Mu_i) | !is.finite(Mu_i))){
           Mu_i <- sapply(Mu[i,],function(ii)1/(ncol(Mu)+1))
         }
         v <- v_of_mu(Mu_i)
